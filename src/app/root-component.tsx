@@ -3,6 +3,7 @@ import * as React from "react"
 import { setupRootStore } from "./setup-root-store"
 import { StatefulNavigator } from "../navigation"
 import { RootStore } from "../app/root-store"
+import ConfigureRealm from "../realm/configure"
 import { Provider } from "mobx-react"
 import { BackButtonHandler } from "../navigation/back-button-handler"
 import { contains } from "ramda"
@@ -21,6 +22,9 @@ export class RootComponent extends React.Component<{}, RootComponentState> {
    * re-renders when we're good to go.
    */
   async componentDidMount() {
+    /* Configure realm schemas */
+    ConfigureRealm.recipe()
+
     this.setState({
       rootStore: await setupRootStore(),
     })

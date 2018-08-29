@@ -1,4 +1,6 @@
-export const ComponentSchema = {
+import * as Realm from "realm"
+
+export const ComponentSchema: Realm.ObjectSchema = {
   name: "Component",
   primaryKey: "id",
   properties: {
@@ -10,7 +12,7 @@ export const ComponentSchema = {
   },
 }
 
-export const RecipeSchema = {
+export const RecipeSchema: Realm.ObjectSchema = {
   name: "Recipe",
   primaryKey: "id",
   properties: {
@@ -34,3 +36,11 @@ export interface ComponentType {
   unit?: string
   created: Date
 }
+
+const Config: Realm.Configuration = {
+  schema: [RecipeSchema, ComponentSchema],
+  schemaVersion: 0,
+  migration: () => {},
+}
+
+export default Config

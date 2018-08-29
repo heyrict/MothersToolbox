@@ -1,8 +1,8 @@
-import * as Realm from "realm"
+import Realm from "realm"
 
 export interface WithRealmProps {
   query?: (realm: Realm, ownProps: any) => object
-  schema?: Realm.ObjectSchema[]
+  config: Realm.Configuration
 }
 
 export interface WithRealmWrapperProps {}
@@ -17,6 +17,6 @@ export interface WithRealmWrappedProps {
   loading: boolean
   data: object | ReadonlyArray<{}>
   error?: object
-  refetch: () => void
+  realm: Realm
   update: () => void
 }

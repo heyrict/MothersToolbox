@@ -2,7 +2,8 @@
   "common": {
     "ok": "确认",
     "cancel": "取消",
-    "back": "返回"
+    "back": "返回",
+    "reset": "复位"
   },
   "errors": {
     "invalidEmail": "不合法的邮箱地址！"

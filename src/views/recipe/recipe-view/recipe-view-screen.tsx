@@ -1,5 +1,4 @@
 import * as React from "react"
-import * as Realm from "realm"
 import Modal from "react-native-modal"
 import { observer } from "mobx-react"
 import { SwipeListView } from "react-native-swipe-list-view"
@@ -12,7 +11,8 @@ import { Button } from "../../shared/button"
 import { Screen } from "../../shared/screen"
 import { NavigationScreenProps } from "react-navigation"
 import { WithRealmWrappedProps } from "../../shared/withRealm/withRealm.props"
-import { RecipeSchema, ComponentSchema, ComponentType } from "../../../realm/recipe"
+import { ComponentType } from "../../../realm/recipe"
+import RecipeConfig from "../../../realm/recipe"
 import { RecipeViewItem } from "./recipe-view-item"
 import {
   ROOT,
@@ -72,6 +72,12 @@ export class RecipeView extends React.Component<
     })
   }
 
+  applyRatio = (mul: number) => {
+    this.setState(({ ratio }) => ({
+      ratio: ratio * mul,
+    }))
+  }
+
   _keyExtractor = item => `${item.id}`
 
   _renderItem({ item }) {
@@ -95,53 +101,47 @@ export class RecipeView extends React.Component<
 
   createComponent() {
     let recipe: any = this.props.data
-    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
-      realm.write(() => {
-        let nextId: number = 1
-        const maxId = realm.objects("Component").max("id")
-        if (typeof maxId === "number") {
-          nextId = maxId + 1
-        }
+    this.props.realm.write(() => {
+      let nextId: number = 1
+      const maxId = this.props.realm.objects("Component").max("id")
+      if (typeof maxId === "number") {
+        nextId = maxId + 1
+      }
 
-        let component = realm.create("Component", {
-          id: nextId,
-          name: this.state.componentName,
-          amount: Number.parseFloat(this.state.componentAmount),
-          unit: this.state.componentUnit,
-          created: new Date(),
-        })
-        recipe.components.push(component)
+      let component = this.props.realm.create("Component", {
+        id: nextId,
+        name: this.state.componentName,
+        amount: Number.parseFloat(this.state.componentAmount),
+        unit: this.state.componentUnit,
+        created: new Date(),
       })
-      this.props.update()
+      recipe.components.push(component)
     })
+    this.props.update()
   }
 
   updateComponent(componentId: number) {
-    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
-      realm.write(() => {
-        realm.create(
-          "Component",
-          {
-            id: componentId,
-            name: this.state.componentName,
-            amount: Number.parseFloat(this.state.componentAmount),
-            unit: this.state.componentUnit,
-          },
-          true,
-        )
-      })
-      this.props.update()
+    this.props.realm.write(() => {
+      this.props.realm.create(
+        "Component",
+        {
+          id: componentId,
+          name: this.state.componentName,
+          amount: Number.parseFloat(this.state.componentAmount),
+          unit: this.state.componentUnit,
+        },
+        true,
+      )
     })
+    this.props.update()
   }
 
   deleteComponent(componentId: number) {
-    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
-      realm.write(() => {
-        let component = realm.objectForPrimaryKey("Component", componentId)
-        realm.delete(component)
-      })
-      this.props.update()
+    this.props.realm.write(() => {
+      let component = this.props.realm.objectForPrimaryKey("Component", componentId)
+      this.props.realm.delete(component)
     })
+    this.props.update()
   }
 
   handleModalButtonPress() {
@@ -169,13 +169,13 @@ export class RecipeView extends React.Component<
         />
         <View style={TOOLBAR}>
           <Button
-            text="×½"
+            text="÷2"
             style={TOOLBARBTN}
             textStyle={VISIBLE}
-            onPress={this.setRatio.bind(this, 0.5)}
+            onPress={this.applyRatio.bind(this, 0.5)}
           />
           <Button
-            text="×1"
+            tx="common.reset"
             style={TOOLBARBTN}
             textStyle={VISIBLE}
             onPress={this.setRatio.bind(this, 1)}
@@ -184,7 +184,7 @@ export class RecipeView extends React.Component<
             text="×2"
             style={TOOLBARBTN}
             textStyle={VISIBLE}
-            onPress={this.setRatio.bind(this, 2)}
+            onPress={this.applyRatio.bind(this, 2)}
           />
         </View>
         <SwipeListView
@@ -241,6 +241,7 @@ export class RecipeView extends React.Component<
 }
 
 export default withRealm({
+  config: new RecipeConfig().current,
   query: (realm, ownProps) => {
     const recipeId = ownProps.navigation.getParam("recipeId", 0)
     let recipe = realm.objectForPrimaryKey("Recipe", recipeId)

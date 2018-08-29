@@ -1,5 +1,4 @@
 import * as React from "react"
-import * as Realm from "realm"
 import Modal from "react-native-modal"
 import { SwipeListView } from "react-native-swipe-list-view"
 import { observer } from "mobx-react"
@@ -12,7 +11,8 @@ import { Icon } from "../shared/icon"
 import { Screen } from "../shared/screen"
 import { NavigationScreenProps } from "react-navigation"
 import { WithRealmWrappedProps } from "../shared/withRealm/withRealm.props"
-import { RecipeSchema, ComponentSchema, RecipeType } from "../../realm/recipe"
+import { RecipeType } from "../../realm/recipe"
+import RecipeConfig from "../../realm/recipe"
 import {
   BACK,
   BKBTNL,
@@ -59,7 +59,14 @@ export class Recipe extends React.Component<
     })
 
   goBack = () => this.props.navigation.goBack(null)
-  goView = recipeId => this.props.navigation.navigate("recipeView", { recipeId })
+  goView = recipeId => {
+    this.props.realm.write(() => {
+      const recipe: RecipeType = this.props.realm.objectForPrimaryKey("Recipe", recipeId)
+      recipe.viewedTimes += 1
+    })
+    this.props.update()
+    this.props.navigation.navigate("recipeView", { recipeId })
+  }
 
   _keyExtractor = item => `${item.id}`
 
@@ -91,60 +98,55 @@ export class Recipe extends React.Component<
   }
 
   duplicateRecipe(item: RecipeType) {
-    const { id, created, ...rest } = item
-    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
-      realm.write(() => {
-        let nextId: number = 1
-        const maxId = realm.objects("Recipe").max("id")
-        if (typeof maxId === "number") {
-          nextId = maxId + 1
-        }
-        realm.create("Recipe", {
-          id: nextId,
-          created: new Date(),
-          ...rest,
-        })
+    const { id, created, viewedTimes, ...rest } = item
+    this.props.realm.write(() => {
+      let nextId: number = 1
+      const maxId = this.props.realm.objects("Recipe").max("id")
+      if (typeof maxId === "number") {
+        nextId = maxId + 1
+      }
+      this.props.realm.create("Recipe", {
+        id: nextId,
+        created: new Date(),
+        viewedTimes: 0,
+        ...rest,
       })
-      this.props.update()
     })
+    this.props.update()
   }
 
   createRecipe() {
-    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
-      realm.write(() => {
-        let nextId: number = 1
-        const maxId = realm.objects("Recipe").max("id")
-        if (typeof maxId === "number") {
-          nextId = maxId + 1
-        }
-        realm.create("Recipe", {
-          id: nextId,
-          name: this.state.recipeName,
-          components: [],
-          created: new Date(),
-        })
+    this.props.realm.write(() => {
+      let nextId: number = 1
+      const maxId = this.props.realm.objects("Recipe").max("id")
+      if (typeof maxId === "number") {
+        nextId = maxId + 1
+      }
+      this.props.realm.create("Recipe", {
+        id: nextId,
+        name: this.state.recipeName,
+        components: [],
+        created: new Date(),
+        viewedTimes: 0,
+        tags: [],
       })
-      this.props.update()
     })
+    this.props.update()
   }
 
   updateRecipe(recipeId: number) {
-    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
-      realm.write(() => {
-        realm.create("Recipe", { id: recipeId, name: this.state.recipeName }, true)
-      })
-      this.props.update()
+    this.props.realm.write(() => {
+      this.props.realm.create("Recipe", { id: recipeId, name: this.state.recipeName }, true)
     })
+    this.props.update()
   }
 
   deleteRecipe(recipeId: number) {
-    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
-      realm.write(() => {
-        let recipe = realm.objectForPrimaryKey("Recipe", recipeId)
-        realm.delete(recipe)
-      })
-      this.props.update()
+    this.props.realm.write(() => {
+      let recipe = this.props.realm.objectForPrimaryKey("Recipe", recipeId)
+      this.props.realm.delete(recipe)
     })
+    this.props.update()
   }
 
   handleModalButtonPress() {
@@ -207,8 +209,8 @@ export class Recipe extends React.Component<
 
 export default withRealm({
   query: realm => {
-    let recipes = realm.objects("Recipe").sorted("id", true)
+    let recipes = realm.objects("Recipe").sorted("viewedTimes", true)
     return recipes
   },
-  schema: [RecipeSchema, ComponentSchema],
+  config: new RecipeConfig().current,
 })(Recipe)
