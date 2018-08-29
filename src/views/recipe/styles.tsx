@@ -2,11 +2,13 @@ import { ViewStyle, TextStyle } from "react-native"
 import { color, spacing } from "../../theme"
 
 export const ROOT: ViewStyle = {
+  flex: 1,
   backgroundColor: color.palette.white,
 }
 
 export const HEADER: TextStyle = {
   backgroundColor: "burlywood",
+  borderRadius: 0,
   marginBottom: spacing[2],
   paddingBottom: spacing[3],
   paddingHorizontal: 0,
@@ -22,6 +24,33 @@ export const HEADER_TITLE: TextStyle = {
   fontWeight: "bold",
 }
 
+export const VISIBLE: TextStyle = {
+  color: color.palette.white,
+  fontSize: 18,
+  lineHeight: 20,
+  letterSpacing: 1.2,
+  fontWeight: "bold",
+}
+
+export const BKBTN: ViewStyle = {
+  backgroundColor: "transparent",
+  borderRadius: 0,
+  height: "100%",
+  paddingHorizontal: spacing[1],
+  paddingVertical: spacing[1],
+  width: 75,
+}
+
+export const BKBTNL: ViewStyle = {
+  ...BKBTN,
+}
+
+export const BKBTNR: ViewStyle = {
+  ...BKBTN,
+  marginLeft: "auto",
+  backgroundColor: color.palette.red,
+}
+
 export const RECIPE_BTN: ViewStyle = {
   paddingVertical: spacing[4],
   backgroundColor: "#5D2555",
@@ -34,6 +63,7 @@ export const RECIPE_BTN_TXT: TextStyle = {
 
 export const LIST: ViewStyle = {
   width: "100%",
+  height: "100%",
   paddingHorizontal: spacing[1],
 }
 
@@ -67,13 +97,33 @@ export const BANNER: ViewStyle = {
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  marginVertical: spacing[1],
+}
+
+export const TOOLBAR: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "flex-start",
+  alignItems: "center",
+  height: 40,
+}
+
+export const TOOLBARBTN: ViewStyle = {
+  backgroundColor: color.palette.blue,
+  paddingHorizontal: spacing[3],
+  paddingVertical: spacing[2],
   marginHorizontal: spacing[1],
+}
+
+export const BACK: ViewStyle = {
+  ...BANNER,
+  marginVertical: spacing[1],
+  backgroundColor: color.palette.green,
 }
 
 export const PANEL: ViewStyle = {
   ...BANNER,
+  marginVertical: spacing[1],
   paddingHorizontal: spacing[2],
+  paddingVertical: spacing[2],
   backgroundColor: color.palette.coffee,
 }
 

@@ -2,7 +2,9 @@ import * as React from "react"
 import * as Realm from "realm"
 import Modal from "react-native-modal"
 import { observer } from "mobx-react"
-import { FlatList, View } from "react-native"
+import { SwipeListView } from "react-native-swipe-list-view"
+import { View } from "react-native"
+import { Icon } from "../../shared/icon"
 import { withRealm } from "../../shared/withRealm"
 import { TextField } from "../../shared/text-field"
 import { Header } from "../../shared/header"
@@ -10,17 +12,32 @@ import { Button } from "../../shared/button"
 import { Screen } from "../../shared/screen"
 import { NavigationScreenProps } from "react-navigation"
 import { WithRealmWrappedProps } from "../../shared/withRealm/withRealm.props"
-import { RecipeSchema, ComponentSchema } from "../../../realm/recipe"
+import { RecipeSchema, ComponentSchema, ComponentType } from "../../../realm/recipe"
 import { RecipeViewItem } from "./recipe-view-item"
-import { ROOT, LIST, HEADER, HEADER_TITLE, MODALVIEW, MODALBTN, MODALINPUT } from "../styles"
+import {
+  ROOT,
+  LIST,
+  HEADER,
+  VISIBLE,
+  TOOLBAR,
+  TOOLBARBTN,
+  HEADER_TITLE,
+  MODALVIEW,
+  MODALBTN,
+  MODALINPUT,
+  BACK,
+  BKBTNL,
+  BKBTNR,
+} from "../styles"
 
 export interface RecipeViewScreenProps extends NavigationScreenProps<{}> {}
 
 export interface RecipeViewScreenStates {
   modalVisible: boolean
-  newComponentName: string
-  newComponentAmount: string
-  newComponentUnit: string
+  modalEditId?: number
+  componentName: string
+  componentAmount: string
+  componentUnit: string
   ratio: number
 }
 
@@ -32,17 +49,22 @@ export class RecipeView extends React.Component<
 > {
   state = {
     modalVisible: false,
-    newComponentName: "",
-    newComponentAmount: "0",
-    newComponentUnit: "",
+    modalEditId: null,
+    componentName: "",
+    componentAmount: "0",
+    componentUnit: "",
     ratio: 1,
   }
 
-  toggleModalVisible(visible: boolean | undefined) {
-    this.setState(({ modalVisible }) => ({
-      modalVisible: visible === undefined ? !modalVisible : visible,
-    }))
-  }
+  openModal = (item: ComponentType) =>
+    this.setState({
+      modalVisible: true,
+      modalEditId: item ? item.id : null,
+      componentName: item ? item.name : "",
+      componentAmount: item ? item.amount.toString() : "0",
+      componentUnit: item ? item.unit : "",
+    })
+  closeModal = () => this.setState({ modalVisible: false, modalEditId: null })
 
   setRatio = (ratio: number) => {
     this.setState({
@@ -58,6 +80,19 @@ export class RecipeView extends React.Component<
     )
   }
 
+  _renderHiddenItem({ item }) {
+    return (
+      <View style={BACK}>
+        <Button style={BKBTNL} onPress={this.openModal.bind(this, item)}>
+          <Icon style={{ height: 30 }} icon="edit" />
+        </Button>
+        <Button style={BKBTNR} onPress={this.deleteComponent.bind(this, item.id)}>
+          <Icon style={{ height: 30 }} icon="delete" />
+        </Button>
+      </View>
+    )
+  }
+
   createComponent() {
     let recipe: any = this.props.data
     Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
@@ -70,25 +105,53 @@ export class RecipeView extends React.Component<
 
         let component = realm.create("Component", {
           id: nextId,
-          name: this.state.newComponentName,
-          amount: Number.parseFloat(this.state.newComponentAmount),
-          unit: this.state.newComponentUnit,
+          name: this.state.componentName,
+          amount: Number.parseFloat(this.state.componentAmount),
+          unit: this.state.componentUnit,
           created: new Date(),
         })
         recipe.components.push(component)
       })
-      this.props.refetch()
-      this.setState({
-        newComponentName: "",
-        newComponentAmount: "0",
-        newComponentUnit: "",
-      })
+      this.props.update()
     })
   }
 
-  handleCreateComponentButtonPress() {
-    this.createComponent()
-    this.toggleModalVisible(false)
+  updateComponent(componentId: number) {
+    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
+      realm.write(() => {
+        realm.create(
+          "Component",
+          {
+            id: componentId,
+            name: this.state.componentName,
+            amount: Number.parseFloat(this.state.componentAmount),
+            unit: this.state.componentUnit,
+          },
+          true,
+        )
+      })
+      this.props.update()
+    })
+  }
+
+  deleteComponent(componentId: number) {
+    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
+      realm.write(() => {
+        let component = realm.objectForPrimaryKey("Component", componentId)
+        realm.delete(component)
+      })
+      this.props.update()
+    })
+  }
+
+  handleModalButtonPress() {
+    if (this.state.modalEditId) {
+      this.updateComponent(this.state.modalEditId)
+      this.closeModal()
+    } else {
+      this.createComponent()
+      this.closeModal()
+    }
   }
 
   render() {
@@ -100,51 +163,75 @@ export class RecipeView extends React.Component<
           titleStyle={HEADER_TITLE}
           headerText={item.name}
           rightIcon="plus"
-          onRightPress={this.toggleModalVisible.bind(this, true)}
+          onRightPress={this.openModal.bind(this, null)}
           leftIcon="back"
           onLeftPress={() => this.props.navigation.goBack()}
         />
-        <FlatList
+        <View style={TOOLBAR}>
+          <Button
+            text="×½"
+            style={TOOLBARBTN}
+            textStyle={VISIBLE}
+            onPress={this.setRatio.bind(this, 0.5)}
+          />
+          <Button
+            text="×1"
+            style={TOOLBARBTN}
+            textStyle={VISIBLE}
+            onPress={this.setRatio.bind(this, 1)}
+          />
+          <Button
+            text="×2"
+            style={TOOLBARBTN}
+            textStyle={VISIBLE}
+            onPress={this.setRatio.bind(this, 2)}
+          />
+        </View>
+        <SwipeListView
+          useFlatList
           style={LIST}
           data={item.components}
           renderItem={this._renderItem.bind(this)}
+          renderHiddenItem={this._renderHiddenItem.bind(this)}
+          leftOpenValue={75}
+          rightOpenValue={-75}
           keyExtractor={this._keyExtractor.bind(this)}
         />
         <Modal
           isVisible={this.state.modalVisible}
-          onBackdropPress={this.toggleModalVisible.bind(this, false)}
-          onBackButtonPress={this.toggleModalVisible.bind(this, false)}
+          onBackdropPress={this.closeModal.bind(this)}
+          onBackButtonPress={this.closeModal.bind(this)}
         >
           <View style={MODALVIEW}>
             <TextField
               inputStyle={MODALINPUT}
               labelTx="recipe.componentName"
-              value={this.state.newComponentName}
-              onChangeText={newComponentName => this.setState({ newComponentName })}
+              value={this.state.componentName}
+              onChangeText={componentName => this.setState({ componentName })}
             />
             <TextField
               inputStyle={MODALINPUT}
               keyboardType="numeric"
               labelTx="recipe.componentAmount"
-              value={this.state.newComponentAmount}
+              value={this.state.componentAmount}
               onEndEditing={event => {
-                const newComponentAmount: string = event.nativeEvent.text
+                const componentAmount: string = event.nativeEvent.text
                 this.setState({
-                  newComponentAmount: (Number.parseFloat(newComponentAmount) || 0).toString(),
+                  componentAmount: (Number.parseFloat(componentAmount) || 0).toString(),
                 })
               }}
-              onChangeText={newComponentAmount => this.setState({ newComponentAmount })}
+              onChangeText={componentAmount => this.setState({ componentAmount })}
             />
             <TextField
               inputStyle={MODALINPUT}
               labelTx="recipe.componentUnit"
-              value={this.state.newComponentUnit}
-              onChangeText={newComponentUnit => this.setState({ newComponentUnit })}
+              value={this.state.componentUnit}
+              onChangeText={componentUnit => this.setState({ componentUnit })}
             />
             <Button
               tx="common.ok"
               style={MODALBTN}
-              onPress={this.handleCreateComponentButtonPress.bind(this)}
+              onPress={this.handleModalButtonPress.bind(this)}
             />
           </View>
         </Modal>

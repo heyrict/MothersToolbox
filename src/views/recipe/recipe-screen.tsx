@@ -1,17 +1,22 @@
 import * as React from "react"
 import * as Realm from "realm"
 import Modal from "react-native-modal"
+import { SwipeListView } from "react-native-swipe-list-view"
 import { observer } from "mobx-react"
-import { FlatList, View } from "react-native"
+import { View } from "react-native"
 import { withRealm } from "../shared/withRealm"
 import { TextField } from "../shared/text-field"
 import { Header } from "../shared/header"
 import { Button } from "../shared/button"
+import { Icon } from "../shared/icon"
 import { Screen } from "../shared/screen"
 import { NavigationScreenProps } from "react-navigation"
 import { WithRealmWrappedProps } from "../shared/withRealm/withRealm.props"
-import { RecipeSchema, ComponentSchema } from "../../realm/recipe"
+import { RecipeSchema, ComponentSchema, RecipeType } from "../../realm/recipe"
 import {
+  BACK,
+  BKBTNL,
+  BKBTNR,
   ROOT,
   LIST,
   HEADER,
@@ -29,7 +34,8 @@ export interface RecipeScreenProps extends NavigationScreenProps<{}> {
 
 export interface RecipeScreenStates {
   modalVisible: boolean
-  newRecipeName: string
+  recipeName: string
+  modalEditId?: number
 }
 
 // @inject("mobxstuff")
@@ -40,14 +46,17 @@ export class Recipe extends React.Component<
 > {
   state = {
     modalVisible: false,
-    newRecipeName: "",
+    recipeName: "",
+    modalEditId: null,
   }
 
-  toggleModalVisible(visible: boolean | undefined) {
-    this.setState(({ modalVisible }) => ({
-      modalVisible: visible === undefined ? !modalVisible : visible,
-    }))
-  }
+  closeModal = () => this.setState({ modalVisible: false, modalEditId: null })
+  openModal = (item: RecipeType) =>
+    this.setState({
+      modalVisible: true,
+      modalEditId: item ? item.id : null,
+      recipeName: item ? item.name : "",
+    })
 
   goBack = () => this.props.navigation.goBack(null)
   goView = recipeId => this.props.navigation.navigate("recipeView", { recipeId })
@@ -65,6 +74,41 @@ export class Recipe extends React.Component<
     )
   }
 
+  renderHiddenItem({ item }) {
+    return (
+      <View style={BACK}>
+        <Button style={BKBTNL} onPress={this.duplicateRecipe.bind(this, item)}>
+          <Icon style={{ height: 30 }} icon="duplicate" />
+        </Button>
+        <Button style={BKBTNL} onPress={this.openModal.bind(this, item)}>
+          <Icon style={{ height: 30 }} icon="edit" />
+        </Button>
+        <Button style={BKBTNR} onPress={this.deleteRecipe.bind(this, item.id)}>
+          <Icon style={{ height: 30 }} icon="delete" />
+        </Button>
+      </View>
+    )
+  }
+
+  duplicateRecipe(item: RecipeType) {
+    const { id, created, ...rest } = item
+    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
+      realm.write(() => {
+        let nextId: number = 1
+        const maxId = realm.objects("Recipe").max("id")
+        if (typeof maxId === "number") {
+          nextId = maxId + 1
+        }
+        realm.create("Recipe", {
+          id: nextId,
+          created: new Date(),
+          ...rest,
+        })
+      })
+      this.props.update()
+    })
+  }
+
   createRecipe() {
     Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
       realm.write(() => {
@@ -75,21 +119,44 @@ export class Recipe extends React.Component<
         }
         realm.create("Recipe", {
           id: nextId,
-          name: this.state.newRecipeName,
+          name: this.state.recipeName,
           components: [],
           created: new Date(),
         })
       })
-      this.props.refetch()
-      this.setState({
-        newRecipeName: "",
-      })
+      this.props.update()
     })
   }
 
-  handleCreateRecipeButtonPress() {
-    this.createRecipe()
-    this.toggleModalVisible(false)
+  updateRecipe(recipeId: number) {
+    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
+      realm.write(() => {
+        realm.create("Recipe", { id: recipeId, name: this.state.recipeName }, true)
+      })
+      this.props.update()
+    })
+  }
+
+  deleteRecipe(recipeId: number) {
+    Realm.open({ schema: [RecipeSchema, ComponentSchema] }).then(realm => {
+      realm.write(() => {
+        let recipe = realm.objectForPrimaryKey("Recipe", recipeId)
+        realm.delete(recipe)
+      })
+      this.props.update()
+    })
+  }
+
+  handleModalButtonPress() {
+    if (this.state.modalEditId !== null) {
+      /* Update model with id `modalEditId` */
+      this.updateRecipe(this.state.modalEditId)
+      this.closeModal()
+    } else {
+      /* Create new model */
+      this.createRecipe()
+      this.closeModal()
+    }
   }
 
   render() {
@@ -99,33 +166,37 @@ export class Recipe extends React.Component<
           leftIcon="back"
           onLeftPress={this.goBack.bind(this)}
           rightIcon="plus"
-          onRightPress={this.toggleModalVisible.bind(this, true)}
+          onRightPress={this.openModal.bind(this, null)}
           style={HEADER}
           titleStyle={HEADER_TITLE}
           headerTx="recipe.title"
         />
-        <FlatList
+        <SwipeListView
+          useFlatList
           style={LIST}
           data={this.props.data}
           renderItem={this.renderListItem.bind(this)}
+          renderHiddenItem={this.renderHiddenItem.bind(this)}
+          leftOpenValue={150}
+          rightOpenValue={-75}
           keyExtractor={this._keyExtractor.bind(this)}
         />
         <Modal
           isVisible={this.state.modalVisible}
-          onBackdropPress={this.toggleModalVisible.bind(this, false)}
-          onBackButtonPress={this.toggleModalVisible.bind(this, false)}
+          onBackdropPress={this.closeModal.bind(this)}
+          onBackButtonPress={this.closeModal.bind(this)}
         >
           <View style={MODALVIEW}>
             <TextField
               inputStyle={MODALINPUT}
               labelTx="recipe.nameLabel"
-              value={this.state.newRecipeName}
-              onChangeText={newRecipeName => this.setState({ newRecipeName })}
+              value={this.state.recipeName}
+              onChangeText={recipeName => this.setState({ recipeName })}
             />
             <Button
               tx="common.ok"
               style={MODALBTN}
-              onPress={this.handleCreateRecipeButtonPress.bind(this)}
+              onPress={this.handleModalButtonPress.bind(this)}
             />
           </View>
         </Modal>
@@ -136,7 +207,7 @@ export class Recipe extends React.Component<
 
 export default withRealm({
   query: realm => {
-    let recipes = realm.objects("Recipe")
+    let recipes = realm.objects("Recipe").sorted("id", true)
     return recipes
   },
   schema: [RecipeSchema, ComponentSchema],

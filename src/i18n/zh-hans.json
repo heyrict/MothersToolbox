@@ -1,0 +1,23 @@
+{
+  "common": {
+    "ok": "确认",
+    "cancel": "取消",
+    "back": "返回"
+  },
+  "errors": {
+    "invalidEmail": "不合法的邮箱地址！"
+  },
+  "mainScreen": {
+    "header": "MainScreen Header"
+  },
+  "home": {
+    "header": "儿子的工具箱"
+  },
+  "recipe": {
+    "title": "我的配料单",
+    "nameLabel": "名称",
+    "componentName": "配料名",
+    "componentUnit": "配料单位",
+    "componentAmount": "配料数量"
+  }
+}

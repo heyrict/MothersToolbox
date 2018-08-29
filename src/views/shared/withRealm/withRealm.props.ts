@@ -18,4 +18,5 @@ export interface WithRealmWrappedProps {
   data: object | ReadonlyArray<{}>
   error?: object
   refetch: () => void
+  update: () => void
 }

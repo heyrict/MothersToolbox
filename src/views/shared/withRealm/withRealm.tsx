@@ -29,11 +29,22 @@ export const withRealm = (options: WithRealmProps) => (
         })
     }
 
+    update() {
+      this.forceUpdate()
+    }
+
     componentWillMount() {
       this.refetch()
     }
 
     render() {
-      return <Wrapped {...this.props} {...this.state} refetch={this.forceUpdate.bind(this)} />
+      return (
+        <Wrapped
+          {...this.props}
+          {...this.state}
+          update={this.update.bind(this)}
+          refetch={this.refetch.bind(this)}
+        />
+      )
     }
   }

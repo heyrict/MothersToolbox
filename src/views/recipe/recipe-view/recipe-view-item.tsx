@@ -17,22 +17,16 @@ export interface RecipeViewItemStates {
 
 export class RecipeViewItem extends React.Component<RecipeViewItemProps, RecipeViewItemStates> {
   state = {
-    amountValue: (this.props.item.amount * this.props.ratio).toString(),
+    amountValue: (this.props.item.amount * this.props.ratio).toFixed(2).toString(),
     editing: false,
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!this.state.editing && this.props.ratio !== nextProps.ratio) {
+    if (!this.state.editing) {
       this.setState({
-        amountValue: (nextProps.item.amount * nextProps.ratio).toString(),
+        amountValue: (nextProps.item.amount * nextProps.ratio).toFixed(2).toString(),
       })
     }
-  }
-
-  _handleStartEditing() {
-    this.setState({
-      editing: true,
-    })
   }
 
   _handleEndEditing(event) {
@@ -47,6 +41,7 @@ export class RecipeViewItem extends React.Component<RecipeViewItemProps, RecipeV
   _handleChangeText(text) {
     this.setState({
       amountValue: text,
+      editing: true,
     })
     const amountValue = Number.parseFloat(text)
     if (amountValue !== this.props.item.amount * this.props.ratio) {
@@ -64,7 +59,6 @@ export class RecipeViewItem extends React.Component<RecipeViewItemProps, RecipeV
           keyboardType="numeric"
           style={PANELTXT}
           value={this.state.amountValue}
-          onTouchStart={this._handleStartEditing.bind(this)}
           onEndEditing={this._handleEndEditing.bind(this)}
           onChangeText={this._handleChangeText.bind(this)}
         />

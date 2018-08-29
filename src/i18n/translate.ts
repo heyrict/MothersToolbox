@@ -6,7 +6,8 @@ import I18n from "react-native-i18n"
  * @param key The i18n key.
  */
 export function translate(key: string) {
-  return key ? I18n.t(key) : null
+  /* Disable auto locale selection for now */
+  return key ? I18n.t(key, { locale: "zh" }) : null
 }
 
 /**
