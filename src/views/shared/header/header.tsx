@@ -34,6 +34,7 @@ export class Header extends React.Component<HeaderProps, {}> {
       headerText,
       headerTx,
       titleStyle,
+      children,
     } = this.props
     const header = headerText || (headerTx && translate(headerTx)) || ""
 
@@ -47,7 +48,7 @@ export class Header extends React.Component<HeaderProps, {}> {
           <View style={LEFT} />
         )}
         <View style={TITLE_MIDDLE}>
-          <Text style={{...TITLE, ...titleStyle}} text={header} />
+          {children || <Text style={{...TITLE, ...titleStyle}} text={header} />}
         </View>
         {rightIcon ? (
           <Button preset="link" onPress={onRightPress}>

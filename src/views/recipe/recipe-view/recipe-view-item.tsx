@@ -29,11 +29,21 @@ export class RecipeViewItem extends React.Component<RecipeViewItemProps, RecipeV
     }
   }
 
+  _handleFocus() {
+    this.setState(prevState => {
+      const amountValue = parseInt(prevState.amountValue, 10).toString()
+      return {
+        amountValue: amountValue,
+        editing: true,
+      }
+    })
+  }
+
   _handleEndEditing(event) {
     const amount: string = event.nativeEvent.text
     const amountValue = Number.parseFloat(amount)
     this.setState({
-      amountValue: amountValue.toString(),
+      amountValue: amountValue.toFixed(2).toString(),
       editing: false,
     })
   }
@@ -56,9 +66,11 @@ export class RecipeViewItem extends React.Component<RecipeViewItemProps, RecipeV
       <View style={PANEL}>
         <Text style={PANELTXT} text={item.name} />
         <TextInput
+          selectTextOnFocus
           keyboardType="numeric"
           style={PANELTXT}
           value={this.state.amountValue}
+          onFocus={this._handleFocus.bind(this)}
           onEndEditing={this._handleEndEditing.bind(this)}
           onChangeText={this._handleChangeText.bind(this)}
         />

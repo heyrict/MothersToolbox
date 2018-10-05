@@ -30,7 +30,9 @@ import {
   BKBTNR,
 } from "../styles"
 
-export interface RecipeViewScreenProps extends NavigationScreenProps<{}> {}
+export interface RecipeViewScreenProps extends NavigationScreenProps<{}> {
+  data: object
+}
 
 export interface RecipeViewScreenStates {
   modalVisible: boolean
@@ -210,6 +212,7 @@ export class RecipeView extends React.Component<
               onChangeText={componentName => this.setState({ componentName })}
             />
             <TextField
+              selectTextOnFocus
               inputStyle={MODALINPUT}
               keyboardType="numeric"
               labelTx="recipe.componentAmount"
@@ -245,6 +248,8 @@ export default withRealm({
   query: (realm, ownProps) => {
     const recipeId = ownProps.navigation.getParam("recipeId", 0)
     let recipe = realm.objectForPrimaryKey("Recipe", recipeId)
-    return recipe
+    return {
+      data: recipe,
+    }
   },
 })(RecipeView)

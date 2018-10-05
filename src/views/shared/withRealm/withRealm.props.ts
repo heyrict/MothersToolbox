@@ -1,7 +1,7 @@
 import Realm from "realm"
 
 export interface WithRealmProps {
-  query?: (realm: Realm, ownProps: any) => object
+  query?: (realm: Realm, ownProps: {[key: string]: any}) => object
   config: Realm.Configuration
 }
 
@@ -15,7 +15,6 @@ export interface WithRealmWrapperStates {
 
 export interface WithRealmWrappedProps {
   loading: boolean
-  data: object | ReadonlyArray<{}>
   error?: object
   realm: Realm
   update: () => void

@@ -743,9 +743,9 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-navigation@1.5.2":
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/@types/react-navigation/-/react-navigation-1.5.2.tgz#f0efa17455d639c6540299511c5f8b3e869b90ba"
+"@types/react-navigation@^2.0.23":
+  version "2.0.23"
+  resolved "https://registry.yarnpkg.com/@types/react-navigation/-/react-navigation-2.0.23.tgz#b06e3fef80f702ee4a513867b24b8155622444c2"
   dependencies:
     "@types/react" "*"
     "@types/react-native" "*"
@@ -6576,9 +6576,9 @@ mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0, mkdirp@~0.5.1:
   dependencies:
     minimist "0.0.8"
 
-mobx-react@5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/mobx-react/-/mobx-react-5.1.2.tgz#ec5c2d29a1df823dbd1b37e214fa36a0907054e2"
+mobx-react@^5.2.8:
+  version "5.2.8"
+  resolved "https://registry.yarnpkg.com/mobx-react/-/mobx-react-5.2.8.tgz#059c7f29254d7cd36e103d79113103b40348d3bf"
   dependencies:
     hoist-non-react-statics "^2.5.0"
     react-lifecycles-compat "^3.0.2"
@@ -8171,7 +8171,7 @@ react-native-modal@^6.5.0:
 
 react-native-safe-area-view@^0.7.0:
   version "0.7.0"
-  resolved "https://registry.yarnpkg.com/react-native-safe-area-view/-/react-native-safe-area-view-0.7.0.tgz#38f5ab9368d6ef9e5d18ab64212938af3ec39421"
+  resolved "http://registry.npmjs.org/react-native-safe-area-view/-/react-native-safe-area-view-0.7.0.tgz#38f5ab9368d6ef9e5d18ab64212938af3ec39421"
   dependencies:
     hoist-non-react-statics "^2.3.1"
 
@@ -8195,11 +8195,11 @@ react-native-tab-view@^0.0.77:
   dependencies:
     prop-types "^15.6.0"
 
-react-native-tab-view@~0.0.78:
-  version "0.0.78"
-  resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-0.0.78.tgz#9b90730d89cbd34a03f0e0ab10e74ca7af945560"
+react-native-tab-view@^1.0.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-1.2.0.tgz#0cc26a1c8e49b6c0d58a30363dbbe43954907c31"
   dependencies:
-    prop-types "^15.6.0"
+    prop-types "^15.6.1"
 
 react-native-typescript-transformer@1.2.5:
   version "1.2.5"
@@ -8281,19 +8281,25 @@ react-navigation-deprecated-tab-navigator@1.3.0:
   dependencies:
     react-native-tab-view "^0.0.77"
 
-react-navigation-tabs@0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/react-navigation-tabs/-/react-navigation-tabs-0.3.0.tgz#b1fe7ef1c665dd8928fafcc8622616e220ae5efa"
+react-navigation-drawer@0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/react-navigation-drawer/-/react-navigation-drawer-0.2.1.tgz#fed9b09a41ddfdc1ff198fad04a7b6051def8adf"
+  dependencies:
+    react-native-drawer-layout-polyfill "^1.3.2"
+
+react-navigation-tabs@0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/react-navigation-tabs/-/react-navigation-tabs-0.5.1.tgz#ed33bce3a3e21b92646700de25bd94b8fc570371"
   dependencies:
     hoist-non-react-statics "^2.5.0"
-    prop-types "^15.6.0"
+    prop-types "^15.6.1"
     react-lifecycles-compat "^3.0.4"
     react-native-safe-area-view "^0.7.0"
-    react-native-tab-view "~0.0.78"
+    react-native-tab-view "^1.0.0"
 
-react-navigation@2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/react-navigation/-/react-navigation-2.0.4.tgz#efc09de09799c2117a54002a6ea0e9b80e92828d"
+react-navigation@2.2.5:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/react-navigation/-/react-navigation-2.2.5.tgz#5c23091d2a87b63fe8d6be350d155664677b903c"
   dependencies:
     clamp "^1.0.1"
     create-react-context "^0.2.1"
@@ -8301,10 +8307,10 @@ react-navigation@2.0.4:
     path-to-regexp "^1.7.0"
     prop-types "^15.5.10"
     react-lifecycles-compat "^3"
-    react-native-drawer-layout-polyfill "^1.3.2"
     react-native-safe-area-view "^0.8.0"
     react-navigation-deprecated-tab-navigator "1.3.0"
-    react-navigation-tabs "0.3.0"
+    react-navigation-drawer "0.2.1"
+    react-navigation-tabs "0.5.1"
 
 react-powerplug@0.1.5:
   version "0.1.5"

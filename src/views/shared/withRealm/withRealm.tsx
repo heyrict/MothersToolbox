@@ -34,10 +34,13 @@ export const withRealm = (options: WithRealmProps) => (
     }
 
     render() {
+      const { loading, error, data } = this.state
       return (
         <Wrapped
           {...this.props}
-          {...this.state}
+          {...data}
+          loading={loading}
+          error={error}
           update={this.update.bind(this)}
           realm={this.realm}
         />

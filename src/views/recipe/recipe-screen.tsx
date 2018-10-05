@@ -210,7 +210,9 @@ export class Recipe extends React.Component<
 export default withRealm({
   query: realm => {
     let recipes = realm.objects("Recipe").sorted("viewedTimes", true)
-    return recipes
+    return {
+      data: recipes,
+    }
   },
   config: new RecipeConfig().current,
 })(Recipe)
