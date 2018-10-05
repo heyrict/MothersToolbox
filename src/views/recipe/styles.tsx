@@ -57,6 +57,12 @@ export const RECIPE_BTN: ViewStyle = {
   marginVertical: spacing[1],
 }
 
+export const RECIPE_TAG_BTN: ViewStyle = {
+  paddingVertical: spacing[4],
+  backgroundColor: "#6b52ae",
+  marginVertical: spacing[1],
+}
+
 export const RECIPE_BTN_TXT: TextStyle = {
   fontSize: 20,
 }

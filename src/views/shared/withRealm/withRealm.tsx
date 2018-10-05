@@ -23,6 +23,16 @@ export const withRealm = (options: WithRealmProps) => (
     }
 
     componentWillMount() {
+      this._reload()
+    }
+
+    componentDidUpdate(prevProps) {
+      if (options.checkReload && options.checkReload(prevProps, this.props)) {
+        this._reload()
+      }
+    }
+
+    _reload() {
       this.setState({ loading: true })
       this.realm = new Realm(options.config)
       try {

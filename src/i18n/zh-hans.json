@@ -3,7 +3,8 @@
     "ok": "确认",
     "cancel": "取消",
     "back": "返回",
-    "reset": "复位"
+    "reset": "复位",
+    "search": "搜索"
   },
   "errors": {
     "invalidEmail": "不合法的邮箱地址！"
@@ -19,6 +20,9 @@
     "nameLabel": "名称",
     "componentName": "配料名",
     "componentUnit": "配料单位",
-    "componentAmount": "配料数量"
+    "componentAmount": "配料数量",
+    "taglist": {
+      "title": "我的标签"
+    }
   }
 }

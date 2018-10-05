@@ -59,6 +59,7 @@ export interface ComponentType {
 export interface TagType {
   id: number
   name: string
+  created: Date
   recipes: RecipeType[]
 }
 
